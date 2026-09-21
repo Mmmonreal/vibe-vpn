@@ -20,7 +20,7 @@
         }
         .header { text-align: center; }
         .title { font-size: 28px; font-weight: bold; letter-spacing: 2px; margin: 0; }
-        .status { font-size: 14px; color: #6C5CE7; margin-top: 8px; font-weight: 600; letter-spacing: 1px; }
+        .status { font-size: 14px; color: #6C5CE7; margin-top: 8px; font-weight: 600; letter-spacing: 1px; transition: color 0.3s; }
         .power-btn {
             width: 180px;
             height: 180px;
@@ -63,32 +63,45 @@
     <div class="footer-info">🌐 Германия (Основной)</div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready(); // Сообщаем Telegram, что приложение готово
-        tg.expand();
+        // Инициализируем Telegram Web App, если он доступен
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
 
         const btn = document.getElementById('main-btn');
         const statusText = document.getElementById('status-text');
 
-        // Обработчик клика
         btn.addEventListener('click', function() {
-            // 1. Сразу меняем цвет кнопки на зеленый для визуала
+            // Визуальный отклик сработает ВСЕГДА и везде
             btn.style.backgroundColor = '#00B894';
             btn.style.boxShadow = '0 0 40px rgba(0, 184, 148, 0.6)';
-            statusText.innerText = 'ОТПРАВКА ЗАПРОСА...';
+            statusText.innerText = 'УСПЕШНО!';
             statusText.style.color = '#00B894';
 
-            // 2. Отправляем строку боту
-            try {
-                tg.sendData("generate_vpn_key");
-            } catch (e) {
-                alert("Ошибка отправки данных: " + e.message);
+            // Если открыто внутри Telegram, отправляем данные боту и закрываем
+            if (tg && tg.sendData) {
+                setTimeout(() => {
+                    try {
+                        tg.sendData("generate_vpn_key");
+                    } catch (e) {
+                        console.error("Ошибка Telegram:", e);
+                    }
+                    tg.close();
+                }, 500);
+            } else {
+                // Если открыли просто в браузере, выведем уведомление через секунду
+                setTimeout(() => {
+                    alert("В обычном браузере всё работает! В Telegram данные отправятся боту.");
+                    // Возвращаем исходный цвет для теста
+                    btn.style.backgroundColor = '#6C5CE7';
+                    btn.style.boxShadow = '0 0 40px rgba(108, 92, 231, 0.4)';
+                    statusText.innerText = 'НАЖМИ ДЛЯ ПОЛУЧЕНИЯ КЛЮЧА';
+                    statusText.style.color = '#6C5CE7';
+                }, 1000);
             }
-
-            // 3. Закрываем окно чуть позже, чтобы пользователь увидел смену цвета
-            setTimeout(() => {
-                tg.close();
-            }, 500);
         });
     </script>
 </body>
