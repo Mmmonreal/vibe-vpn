@@ -2,106 +2,188 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vibe VPN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>X-route VPN</title>
+    <!-- Подключаем скрипт Telegram Web App -->
     <script src="https://telegram.org"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
         body {
-            background-color: #0D0E15;
-            color: #FFFFFF;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c20 0%, #15103a 50%, #060411 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-evenly;
-            height: 100vh;
-            margin: 0;
-            user-select: none;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 24px;
+            overflow: hidden;
         }
-        .header { text-align: center; }
-        .title { font-size: 28px; font-weight: bold; letter-spacing: 2px; margin: 0; }
-        .status { font-size: 14px; color: #6C5CE7; margin-top: 8px; font-weight: 600; letter-spacing: 1px; transition: color 0.3s; }
-        .power-btn {
-            width: 180px;
-            height: 180px;
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Эффект стеклянной карточки (Glassmorphic Card) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            margin-top: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 10vh;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .status-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .status-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff453a; /* Красный цвет статуса */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ff453a;
             border-radius: 50%;
-            background-color: #6C5CE7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 0 40px rgba(108, 92, 231, 0.4);
-            transition: all 0.2s ease;
-            border: none;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 0 12px #ff453a;
         }
-        .power-icon { width: 70px; height: 70px; fill: #FFFFFF; }
-        .footer-info {
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 16px 0;
+        }
+
+        .info-row {
             display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 24px;
+            justify-content: space-between;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+        }
+
+        .info-row span:last-child {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* Главная кнопка подключения */
+        .action-btn {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border: none;
             border-radius: 20px;
-            font-size: 15px;
+            color: white;
+            width: 100%;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+            transition: all 0.3s ease;
+            margin-bottom: 5vh;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1 class="title">VIBE VPN</h1>
-        <div class="status" id="status-text">НАЖМИ ДЛЯ ПОЛУЧЕНИЯ КЛЮЧА</div>
+        <h1>X-route VPN</h1>
+        <p>Безопасный маршрут в свободный интернет</p>
     </div>
 
-    <button class="power-btn" id="main-btn">
-        <svg class="power-icon" viewBox="0 0 24 24">
-            <path d="M16.56,5.44L15.11,6.89C16.84,8.27 18,10 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,10 7.16,8.27 8.88,6.88L7.44,5.44C5.36,7.3 4,10 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10 18.64,7.3 16.56,5.44M11,3H13V11H11V3Z"/>
-        </svg>
-    </button>
+    <!-- Основная карточка управления -->
+    <div class="glass-card">
+        <div class="status-container">
+            <span class="status-label">Статус сети</span>
+            <div class="status-value">
+                <div class="status-dot"></div>
+                <span>Защита отключена</span>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="info-row">
+            <span>Локация сервера</span>
+            <span>Не выбрана</span>
+        </div>
+        <div class="info-row">
+            <span>Срок действия</span>
+            <span>Истёк</span>
+        </div>
+        <div class="info-row">
+            <span>Протокол доступа</span>
+            <span>VLESS + Reality</span>
+        </div>
+    </div>
 
-    <div class="footer-info">🌐 Германия (Основной)</div>
+    <!-- Кнопка действия -->
+    <button class="action-btn" id="generateBtn">Сгенерировать ключ доступа</button>
 
     <script>
-        // Инициализируем Telegram Web App, если он доступен
-        const tg = window.Telegram ? window.Telegram.WebApp : null;
-        
-        if (tg) {
-            tg.ready();
-            tg.expand();
-        }
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрываем Mini App на весь экран смартфона
+        tg.ready();
 
-        const btn = document.getElementById('main-btn');
-        const statusText = document.getElementById('status-text');
-
-        btn.addEventListener('click', function() {
-            // Визуальный отклик сработает ВСЕГДА и везде
-            btn.style.backgroundColor = '#00B894';
-            btn.style.boxShadow = '0 0 40px rgba(0, 184, 148, 0.6)';
-            statusText.innerText = 'УСПЕШНО!';
-            statusText.style.color = '#00B894';
-
-            // Если открыто внутри Telegram, отправляем данные боту и закрываем
-            if (tg && tg.sendData) {
-                setTimeout(() => {
-                    try {
-                        tg.sendData("generate_vpn_key");
-                    } catch (e) {
-                        console.error("Ошибка Telegram:", e);
-                    }
-                    tg.close();
-                }, 500);
-            } else {
-                // Если открыли просто в браузере, выведем уведомление через секунду
-                setTimeout(() => {
-                    alert("В обычном браузере всё работает! В Telegram данные отправятся боту.");
-                    // Возвращаем исходный цвет для теста
-                    btn.style.backgroundColor = '#6C5CE7';
-                    btn.style.boxShadow = '0 0 40px rgba(108, 92, 231, 0.4)';
-                    statusText.innerText = 'НАЖМИ ДЛЯ ПОЛУЧЕНИЯ КЛЮЧА';
-                    statusText.style.color = '#6C5CE7';
-                }, 1000);
-            }
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            // Передаем команду боту
+            tg.sendData("generate_vpn_key");
+            tg.close();
         });
     </script>
 </body>
